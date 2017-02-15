@@ -136,9 +136,48 @@ let Scriptures = (function () {
     }
   }
 
+  function transitionScriptures(newContent) {
+    if (animatingElements.hasOwnProperty("sciptureIn") || animatingElements.hasOwnProperty("scriptureOut")) {
+      window.setTimeout(transitionScriptures, 200, newScripture);
+      return;
+    }
+
+    let content = $("#scriptures *");
+
+    newContent = $(newContent);
+
+    if (content.length > 0) {
+      animatingElements.scriptureOut = content;
+      content.animate({
+        opacity: 0
+      }, {
+        queue: false,
+        duration: ANIMATION_DURATION,
+        complete: function () {
+          content.remove();
+          delete animatingElements.scriptureOut;
+        }
+      });
+
+      animatingElements.scriptureIn = newContent;
+      newContent.css({opacity: 0}).appendTo("#scriptures");
+      newContent.animate({
+        opacity: 1
+      }, {
+        queue: false,
+        duration: ANIMATION_DURATION,
+        complete: function () {
+          delete animatingElements.scriptureIn;
+        }
+      });
+    } else {
+      $("#scriptures").html(newContent);
+    }
+  }
+
   function getScriptureCallback(html) {
     transitionBreadcrumbs(requestedBreadcrumbs);
-    $("#scriptures").html(html);
+    transitionScriptures(html);
   }
 
   function getScriptureFailed() {
@@ -180,7 +219,7 @@ let Scriptures = (function () {
 
       navContents += "</div>";
 
-      $("#scriptures").html(navContents);
+      transitionScriptures(navContents);
       transitionBreadcrumbs(breadcrumbs(volume, book));
     }
   }
@@ -196,13 +235,16 @@ let Scriptures = (function () {
           navContents += "<a class=\"waves-effect waves-custom waves-ripple btn\" id=\"" + book.id + "\" href=\"#" + volume.id + ":" + book.id + "\">" + book.gridName + "</a>";
         });
         navContents += "</div>";
-        displayedVolume = volume;
+
+        if (volume.id === volumeId) {
+          displayedVolume = volume;
+        }
       }
     });
 
     navContents += "<br /><br /></div>";
 
-    $("#scriptures").html(navContents);
+    transitionScriptures(navContents);
     transitionBreadcrumbs(breadcrumbs(displayedVolume));
   }
 
