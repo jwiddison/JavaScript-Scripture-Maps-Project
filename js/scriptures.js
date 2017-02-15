@@ -158,21 +158,8 @@ let Scriptures = (function () {
     console.log("Warning: scripture request from server failed");
   }
 
-
-  function prevChapter(bookId, chapter) {
-    let book = books[bookId];
-
-    if (book !== undefined) {
-      if (chapter > 1) {
-        return [bookId, chapter - 1];
-      }
-
-      let prevBook = books[bookId - 1];
-
-      if (prevBook !== undefined) {
-        return [prevBook.id, prevBook.numChapters];
-      }
-    }
+  function titleForBookChapter(book, chapter) {
+    return book.tocName + (chapter > 0 ? " " + chapter : "");
   }
 
   function nextChapter(bookId, chapter) {
@@ -180,7 +167,7 @@ let Scriptures = (function () {
 
     if (book !== undefined) {
       if (chapter < book.numChapters) {
-        return [bookId, chapter + 1];
+        return [bookId, chapter + 1, titleForBookChapter(book, chapter + 1)];
       }
 
       let nextBook = books[bookId + 1];
@@ -190,10 +177,27 @@ let Scriptures = (function () {
         if (nextBook.numChapters > 0) {
           nextChapterValue = 1;
         }
-        return [nextBook.id, nextChapterValue];
+        return [nextBook.id, nextChapterValue, titleForBookChapter(nextBook, nextChapterValue)];
       }
     }
   }
+
+  function prevChapter(bookId, chapter) {
+    let book = books[bookId];
+
+    if (book !== undefined) {
+      if (chapter > 1) {
+        return [bookId, chapter - 1, titleForBookChapter(book, chapter - 1)];
+      }
+
+      let prevBook = books[bookId - 1];
+
+      if (prevBook !== undefined) {
+        return [prevBook.id, prevBook.numChapters, titleForBookChapter(prevBook, prevBook.numChapters)];
+      }
+    }
+  }
+
 
   function navigateChapter(bookId, chapter) {
     if (bookId !== undefined) {
@@ -207,13 +211,13 @@ let Scriptures = (function () {
       if (nextPrev === undefined) {
         requestedNextPrev = "";
       } else {
-        requestedNextPrev = "<a href=\"javascript:void(0);\" onclick=\"Scriptures.hash(0, " + nextPrev[0] + ", " + nextPrev[1] + ")\"><i class=\"material-icons\">skip_previous</i></a>";
+        requestedNextPrev = "<a href=\"javascript:void(0);\" onclick=\"Scriptures.hash(0, " + nextPrev[0] + ", " + nextPrev[1] + ")\" title=\"" + nextPrev[2] + "\"><i class=\"material-icons\">skip_previous</i></a>";
       }
 
       nextPrev = nextChapter(bookId, chapter);
 
       if (nextPrev !== undefined) {
-        requestedNextPrev += "<a href=\"javascript:void(0);\" onclick=\"Scriptures.hash(0, " + nextPrev[0] + ", " + nextPrev[1] + ")\"><i class=\"material-icons\">skip_next</i></a>";
+        requestedNextPrev += "<a href=\"javascript:void(0);\" onclick=\"Scriptures.hash(0, " + nextPrev[0] + ", " + nextPrev[1] + ")\" title=\"" + nextPrev[2] + "\"><i class=\"material-icons\">skip_next</i></a>";
       }
 
       $.ajax({
