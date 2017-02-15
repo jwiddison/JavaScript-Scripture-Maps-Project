@@ -1,10 +1,10 @@
 /*property
-    ajax, bookByID, books, dataType, forEach, fullName, hash, html, id, init,
-    length, location, maxBookId, minBookId, nextChapter, numChapter,
-    numChapters, onHashChanged, prevChapter, push, slice, split, substring,
-    success, url, urlForScriptureChapter, volumes
+    ajax, bookByID, books, dataType, forEach, fullName, gridName, hash, html, id, init,
+    length, location, maxBookId, minBookId, nextChapter, numChapters,
+    onHashChanged, parentBookId, prevChapter, push, slice, split, substring,
+    success, tocName, url, urlForScriptureChapter, volumes
 */
-/*global $, window */
+/*global $, Number, window */
 /*jslint es6 browser: true*/
 
 let Scriptures = (function () {
@@ -88,16 +88,32 @@ let Scriptures = (function () {
   };
 
   const navigateBook = function (bookId) {
-    $("#scriptures").html("<p>Book: " + bookId + "</p>");
-
     let book = books[bookId];
     let volume = volumeArray[book.parentBookId - 1];
+    let chapter = 1;
+    let navContents;
 
-    $("#crumb").html(breadcrumbs(volume, book));
+    if (book.numChapters <= 0) {
+      navigateChapter(book.id, 0);
+    } else if (book.numChapters === 1) {
+      navigateChapter(book.id, 1);
+    } else {
+      navContents = "<div id=\"scripnav\"><div class=\"volume\"><h5>" + book.fullName + "</h5></div><divclass=\"books\">";
+
+      while (chapter <= book.numChapters) {
+        navContents += "<a class=\"waves-effect waves-custom waves-ripple btn chapter\" id=\"" + chapter + "\" href=\"#0:" + book.id + ":" + chapter + "\">" + chapter + "</a>";
+        chapter += 1;
+      }
+
+      navContents += "</div>";
+
+      $("#scriptures").html(navContents);
+      $("#crumb").html(breadcrumbs(volume, book));
+    }
   };
 
   const navigateChapter = function (bookId, chapter) {
-    $("#scriptures").html("<p>Book: " + bookId + ", Chpater: " + chapter + "</p>");
+    $("#scriptures").html("<p>Book: " + bookId + ", Chapter: " + chapter + "</p>");
 
     let book = books[bookId];
     let volume = volumeArray[book.parentBookId - 1];
@@ -106,20 +122,24 @@ let Scriptures = (function () {
   };
 
   const navigateHome = function (volumeId) {
-    let newBody = "";
+    let displayedVolume;
+    let navContents = "<div id=\"scripnav\">";
 
     Scriptures.volumes().forEach(function (volume) {
       if (volumeId === undefined || volume.id === volumeId) {
-        newBody += "<p class=\"volume\">" + volume.fullName + "</p><ul>";
+        navContents += "<div class=\"volume\"><a name=\"v" + volume.id + "\" /><h5>" + volume.fullName + "</h5></div><div class=\"books\">";
         volume.books.forEach(function (book) {
-          newBody += "<li class=\"book\">" + book.fullName + "</li>";
+          navContents += "<a class=\"waves-effect waves-custom waves-ripple btn\" id=\"" + book.id + "\" href=\"#" + volume.id + ":" + book.id + "\">" + book.gridName + "</a>";
         });
-        newBody += "</ul>";
+        navContents += "</div>";
+        displayedVolume = volume;
       }
     });
 
-    $("#scriptures").html(newBody);
-    $("#crumb").html(breadcrumbs(volumeId));
+    navContents += "<br /><br /></div>";
+
+    $("#scriptures").html(navContents);
+    $("#crumb").html(breadcrumbs(displayedVolume));
   };
 
   // Public API
@@ -194,7 +214,7 @@ let Scriptures = (function () {
 
           if (nextBook !== undefined) {
             let nextChapter = 0;
-            if (nextBook.numChapter > 0) {
+            if (nextBook.numChapters > 0) {
               nextChapter = 1;
             }
             return [nextBook.id, nextChapter];

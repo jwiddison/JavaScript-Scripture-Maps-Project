@@ -1,4 +1,2 @@
-HW 6 Widdison Jordan
+HW 7 Widdison Jordan
 Map Scriptures Project
-
-This was the first time I really dived into JavaScript beyond simple DOM manipulation.  I had never really realized how powerful of a thing javascript can be.  Its cool to see a lot of the programming concepts and best practices that we learned in iOS last semester coming up again in JS and coding for the web.  I had no idea that you could set breakpoints and de-bug in Chrome (again, because I've never done any really serious JS work before) but that's a really great thing to know.  I'm gald its included in Chrome and that I know how to use it now.  I also got a lot more comfortable with the JS syntax (boo for having to put ; on the end of lines again.  I didn't miss that with Swift or Python)  I had also never really used a callback before.  I'd heard of them, and had some idea about them, but didn't really have an idea of what they were or how to use them.  I'm excited to get to finish the project and see more cool stuff that can be done in JavaScript.
