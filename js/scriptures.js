@@ -336,10 +336,8 @@ let Scriptures = (function () {
     },
 
     onHashChanged() {
-      let bookId;
-      let chapter;
       let ids = [];
-      let volumeId;
+      let bookId;
 
       if (window.location.hash !== "" && window.location.hash.length > 1) {
         // Remove leading # and split string on :
@@ -350,7 +348,7 @@ let Scriptures = (function () {
         navigateHome();
       } else if (ids.length === 1) {
         // Show single volume's table of contents
-        volumeId = Number(ids[0]);
+        let volumeId = Number(ids[0]);
 
         if (volumeId < volumeArray[0].id || volumeId > volumeArray[volumeArray.length - 1].id) {
           navigateHome();
@@ -369,7 +367,7 @@ let Scriptures = (function () {
       } else {
         // Display a specific chapter
         bookId = Number(ids[1]);
-        chapter = Number(ids[2]);
+        let chapter = Number(ids[2]);
 
         if (!bookChapterValid(bookId, chapter)) {
           navigateHome();
