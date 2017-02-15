@@ -1,11 +1,12 @@
 /*property
-    ajax, animate, appendTo, bookByID, books, complete, crumbsIn, crumbsOut,
-    css, dataType, duration, error, forEach, fullName, gridName,
-    hasOwnProperty, hash, html, id, init, length, location, log, maxBookId,
-    minBookId, nextChapter, numChapters, onHashChanged, opacity, parentBookId,
-    prevChapter, push, queue, remove, setTimeout, slice, split, substring,
-    success, tocName, url, urlForScriptureChapter, volumes
+    ajax, animate, append, appendTo, bookByID, books, complete, css, dataType,
+    duration, error, find, forEach, fullName, gridName, hasOwnProperty, hash,
+    html, id, init, length, location, log, maxBookId, minBookId, nextChapter,
+    numChapters, onHashChanged, opacity, parentBookId, prevChapter, push,
+    queue, remove, setTimeout, slice, split, substring, success, tocName, url,
+    urlForScriptureChapter, volumes
 */
+
 
 /*global $, Number, window, console */
 /*jslint es6 browser: true*/
@@ -23,8 +24,9 @@ let Scriptures = (function () {
 
   let animatingElements = {};
   let books;
-  let volumeArray;
   let requestedBreadcrumbs;
+  let requestedNextPrev;
+  let volumeArray;
 
   // Private Methods
 
@@ -99,7 +101,7 @@ let Scriptures = (function () {
 
   function transitionCrossfade(newContent, property, parentSelector, childSelector) {
     if (animatingElements.hasOwnProperty(property + "In") || animatingElements.hasOwnProperty(property + "Out")) {
-      window.setTimeout(transitionScriptures, 200, newContent);
+      window.setTimeout(transitionCrossfade, 200, newContent);
       return;
     }
 
@@ -145,12 +147,52 @@ let Scriptures = (function () {
   }
 
   function getScriptureCallback(html) {
-    transitionBreadcrumbs(requestedBreadcrumbs);
+    html = $(html);
+    html.find(".navheading").append("<div class=\"nextprev\">" + requestedNextPrev + "</div>");
+
     transitionScriptures(html);
+    transitionBreadcrumbs(requestedBreadcrumbs);
   }
 
   function getScriptureFailed() {
     console.log("Warning: scripture request from server failed");
+  }
+
+
+  function prevChapter(bookId, chapter) {
+    let book = books[bookId];
+
+    if (book !== undefined) {
+      if (chapter > 1) {
+        return [bookId, chapter - 1];
+      }
+
+      let prevBook = books[bookId - 1];
+
+      if (prevBook !== undefined) {
+        return [prevBook.id, prevBook.numChapters];
+      }
+    }
+  }
+
+  function nextChapter(bookId, chapter) {
+    let book = books[bookId];
+
+    if (book !== undefined) {
+      if (chapter < book.numChapters) {
+        return [bookId, chapter + 1];
+      }
+
+      let nextBook = books[bookId + 1];
+
+      if (nextBook !== undefined) {
+        let nextChapterValue = 0;
+        if (nextBook.numChapters > 0) {
+          nextChapterValue = 1;
+        }
+        return [nextBook.id, nextChapterValue];
+      }
+    }
   }
 
   function navigateChapter(bookId, chapter) {
@@ -159,6 +201,20 @@ let Scriptures = (function () {
       let volume = volumeArray[book.parentBookId - 1];
 
       requestedBreadcrumbs = breadcrumbs(volume, book, chapter);
+
+      let nextPrev = prevChapter(bookId, chapter);
+
+      if (nextPrev === undefined) {
+        requestedNextPrev = "";
+      } else {
+        requestedNextPrev = "<a href=\"javascript:void(0);\" onclick=\"Scriptures.hash(0, " + nextPrev[0] + ", " + nextPrev[1] + ")\"><i class=\"material-icons\">skip_previous</i></a>";
+      }
+
+      nextPrev = nextChapter(bookId, chapter);
+
+      if (nextPrev !== undefined) {
+        requestedNextPrev += "<a href=\"javascript:void(0);\" onclick=\"Scriptures.hash(0, " + nextPrev[0] + ", " + nextPrev[1] + ")\"><i class=\"material-icons\">skip_next</i></a>";
+      }
 
       $.ajax({
         "url": encodedScriptureUrlPrameters(bookId, chapter),
@@ -277,26 +333,6 @@ let Scriptures = (function () {
       });
     },
 
-    nextChapter(bookId, chapter) {
-        let book = books[bookId];
-
-        if (book !== undefined) {
-          if (chapter < book.numChapters) {
-            return [bookId, chapter + 1];
-          }
-
-          let nextBook = books[bookId + 1];
-
-          if (nextBook !== undefined) {
-            let nextChapter = 0;
-            if (nextBook.numChapters > 0) {
-              nextChapter = 1;
-            }
-            return [nextBook.id, nextChapter];
-          }
-        }
-    },
-
     onHashChanged() {
       let bookId;
       let chapter;
@@ -337,23 +373,6 @@ let Scriptures = (function () {
           navigateHome();
         } else {
           navigateChapter(bookId, chapter);
-        }
-      }
-    },
-
-    // BookId and chapter must be integers
-    prevChapter(bookId, chapter) {
-      let book = books[bookId];
-
-      if (book !== undefined) {
-        if (chapter > 1) {
-          return [bookId, chapter - 1];
-        }
-
-        let prevBook = books[bookId - 1];
-
-        if (prevBook !== undefined) {
-          return [prevBook.id, prevBook.numChapters];
         }
       }
     },
