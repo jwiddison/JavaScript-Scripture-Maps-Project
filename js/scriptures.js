@@ -11,10 +11,15 @@ let Scriptures = (function () {
   // Force the browser into JS strict compliance mode.
   "use strict";
 
+  // Constants
+
+  const SCRIPTURES_URL = "http://scriptures.byu.edu/mapscrip/mapgetscrip.php";
+
   // Private Variables
 
   let books;
   let volumeArray;
+  let requestedBreadcrumbs;
 
   // Private Methods
 
@@ -83,9 +88,18 @@ let Scriptures = (function () {
         options += "&jst=JST";
       }
 
-      return "http://scriptures.byu.edu/scriptures/scriptures_ajax/" + bookId + "/" + chapter + "?verses" + options;
+      return SCRIPTURES_URL + "?book=" + bookId + "&chap=" + chapter + "&verses=" + options;
     }
   };
+
+  const getScriptureCallback = function (html) {
+    $("#crumb").html(requestedBreadcrumbs);
+    $("#scriptures").html(html);
+  };
+
+  const getScriptureFailed = function () {
+    console.log("Warning: scripture request from server failed");
+  }
 
   const navigateBook = function (bookId) {
     let book = books[bookId];
@@ -98,7 +112,7 @@ let Scriptures = (function () {
     } else if (book.numChapters === 1) {
       navigateChapter(book.id, 1);
     } else {
-      navContents = "<div id=\"scripnav\"><div class=\"volume\"><h5>" + book.fullName + "</h5></div><divclass=\"books\">";
+      navContents = "<div id=\"scripnav\"><div class=\"volume\"><h5>" + book.fullName + "</h5></div><div class=\"books\">";
 
       while (chapter <= book.numChapters) {
         navContents += "<a class=\"waves-effect waves-custom waves-ripple btn chapter\" id=\"" + chapter + "\" href=\"#0:" + book.id + ":" + chapter + "\">" + chapter + "</a>";
@@ -113,12 +127,18 @@ let Scriptures = (function () {
   };
 
   const navigateChapter = function (bookId, chapter) {
-    $("#scriptures").html("<p>Book: " + bookId + ", Chapter: " + chapter + "</p>");
+    if (bookId !== undefined) {
+      let book = books[bookId];
+      let volume = volumeArray[book.parentBookId - 1];
 
-    let book = books[bookId];
-    let volume = volumeArray[book.parentBookId - 1];
+      requestedBreadcrumbs = breadcrumbs(volume, book, chapter);
 
-    $("#crumb").html(breadcrumbs(volume, book, chapter));
+      $.ajax({
+        "url": encodedScriptureUrlPrameters(bookId, chapter),
+        "success": getScriptureCallback,
+        "error": getScriptureFailed
+      });
+    }
   };
 
   const navigateHome = function (volumeId) {
