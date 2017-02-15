@@ -97,57 +97,18 @@ let Scriptures = (function () {
     }
   }
 
-  function transitionBreadcrumbs(newCrumbs) {
-    if (animatingElements.hasOwnProperty("crumbsIn") || animatingElements.hasOwnProperty("crumbsOut")) {
-      window.setTimeout(transitionBreadcrumbs, 200, newCrumbs);
+  function transitionCrossfade(newContent, property, parentSelector, childSelector) {
+    if (animatingElements.hasOwnProperty(property + "In") || animatingElements.hasOwnProperty(property + "Out")) {
+      window.setTimeout(transitionScriptures, 200, newContent);
       return;
     }
 
-    let crumbs = $("#crumb ul");
-
-    newCrumbs = $(newCrumbs);
-
-    if (crumbs.length > 0) {
-      animatingElements.crumbsOut = crumbs;
-      crumbs.animate({
-        opacity: 0
-      }, {
-        queue: false,
-        duration: ANIMATION_DURATION,
-        complete: function () {
-          crumbs.remove();
-          delete animatingElements.crumbsOut;
-        }
-      });
-
-      animatingElements.crumbsIn = newCrumbs;
-      newCrumbs.css({opacity: 0}).appendTo("#crumb");
-      newCrumbs.animate({
-        opacity: 1
-      }, {
-        queue: false,
-        duration: ANIMATION_DURATION,
-        complete: function () {
-          delete animatingElements.crumbsIn;
-        }
-      });
-    } else {
-      $("#crumb").html(newCrumbs);
-    }
-  }
-
-  function transitionScriptures(newContent) {
-    if (animatingElements.hasOwnProperty("sciptureIn") || animatingElements.hasOwnProperty("scriptureOut")) {
-      window.setTimeout(transitionScriptures, 200, newScripture);
-      return;
-    }
-
-    let content = $("#scriptures *");
+    let content = $(parentSelector + " " + childSelector);
 
     newContent = $(newContent);
 
     if (content.length > 0) {
-      animatingElements.scriptureOut = content;
+      animatingElements[property + "Out"] = content;
       content.animate({
         opacity: 0
       }, {
@@ -155,24 +116,32 @@ let Scriptures = (function () {
         duration: ANIMATION_DURATION,
         complete: function () {
           content.remove();
-          delete animatingElements.scriptureOut;
+          delete animatingElements[property + "Out"];
         }
       });
 
-      animatingElements.scriptureIn = newContent;
-      newContent.css({opacity: 0}).appendTo("#scriptures");
+      animatingElements[property + "In"] = newContent;
+      newContent.css({opacity: 0}).appendTo(parentSelector);
       newContent.animate({
         opacity: 1
       }, {
         queue: false,
         duration: ANIMATION_DURATION,
         complete: function () {
-          delete animatingElements.scriptureIn;
+          delete animatingElements[property + "In"];
         }
       });
     } else {
-      $("#scriptures").html(newContent);
+      $(parentSelector).html(newContent);
     }
+  }
+
+  function transitionBreadcrumbs(newCrumbs) {
+    transitionCrossfade(newCrumbs, "crumbs", "#crumb", "ul");
+  }
+
+  function transitionScriptures(newContent) {
+    transitionCrossfade(newContent, "scriptures", "#scriptures", "*");
   }
 
   function getScriptureCallback(html) {
