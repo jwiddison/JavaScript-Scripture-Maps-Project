@@ -222,7 +222,7 @@ div.navheading {
     justify-content: center;
 }
 
-#scriptures ul.versesblock {
+ul.versesblock {
     margin: 0;
     line-height: auto;
     list-style: none;
@@ -270,4 +270,85 @@ span.verse {
 .navheading .nextprev {
     position: absolute;
     right: 1em;
+}
+
+
+/* Media Query Stuff for Homework 8
+
+TODOS:
+
+1. DONE - The content on the page should flow vertically, not horizontally (put the map div above the scripture navigation div).
+2. DONE - The map div ought to be sized sufficiently large, and the scripture div ought to be a reasonable but smaller size.
+3. DONE - Don't show the subtitle when the screen is narrow.
+4. DONE - Stack the breadcrumbs beneath the title, not side-by-side.
+5. DONE - The next/prev icon links (in a chapter page) ought to be smaller when the scripture window is narrower.
+
+*/
+
+@media (max-width: 920px) {
+
+  /* #1 & #2 */
+  #content {
+    flex-direction: column;
+  }
+
+  #scriptures {
+    min-width: 100%;
+    max-width: 100%;
+    order: 2;
+  }
+
+  #map {
+    order: 1;
+    height: 400px;
+    min-height: 400px;
+    padding: 1.25em;
+  }
+
+  /* #3 */
+  div .subtitle {
+    display: none;
+  }
+
+  /* #4 */
+  #header {
+    flex-direction: column;
+    height: 70px;
+  }
+
+  #content {
+    top: 70px;
+  }
+
+  #crumb {
+    order: 2;
+    float: right;
+    padding-top: 0;
+    margin-bottom: 30px;
+  }
+
+  #centerhead {
+    order: 1;
+  }
+
+  /* #5 */
+  div .nextprev > a > i {
+    font-size: 12pt;
+  }
+}
+
+/* Add another breakpoint for when crumbs are too long and need to wrap */
+
+@media (max-width: 280px) {
+  #header {
+    height: 110px;
+  }
+
+  #content {
+    top: 110px;
+  }
+
+  #crumb {
+    margin-bottom: 50px;
+  }
 }
