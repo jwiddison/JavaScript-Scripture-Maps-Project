@@ -11,6 +11,27 @@
 /*global $, Number, window, console */
 /*jslint es6 browser: true*/
 
+function initMap() {
+  var jerusalem = {lat: 31.7683, lng: 35.2137};
+  var map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 9,
+    center: jerusalem
+  });
+}
+
+function showLocation(geotagId, placename, latitude, longitude, viewLatitude, viewLongitude, viewTilt, viewRoll, viewAltitude, viewHeading) {
+  var location = {lat: latitude, lng: longitude};
+  var map = new google.maps.Map(document.getElementById('map'), {
+    zoom: viewAltitude / 500,
+    center: location
+  });
+  var marker = new google.maps.Marker({
+    position: location,
+    map: map,
+    label: placename
+  });
+}
+
 let Scriptures = (function () {
   // Force the browser into JS strict compliance mode.
   "use strict";
@@ -136,6 +157,15 @@ let Scriptures = (function () {
     } else {
       $(parentSelector).html(newContent);
     }
+
+    $("a[onclick^='showLocation']").each(function(){
+      console.log(this);
+      // Get map object
+      // Clear all map pins
+      // Drop pins in each location
+      // Pan to show all locations using fitBounds()
+
+    });
   }
 
   function transitionBreadcrumbs(newCrumbs) {

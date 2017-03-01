@@ -41,19 +41,6 @@
         Scriptures.init(Scriptures.onHashChanged);
       });
     </script>
-    <script>
-      function initMap() {
-        var jerusalem = {lat: 31.7683, lng: 35.2137};
-        var map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 9,
-          center: jerusalem
-        });
-        // var marker = new google.maps.Marker({
-        //   position: jerusalem,
-        //   map: map
-        // });
-      }
-    </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAl0qNZKO_aRJOyxD4sGkcHM-6yuF-XXJU&callback=initMap"></script>
   </body>
 </html>
