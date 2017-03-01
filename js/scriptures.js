@@ -12,6 +12,7 @@
 /*jslint es6 browser: true*/
 
 var map;
+var markers = [];
 
 function initMap() {
   var jerusalem = {lat: 31.7683, lng: 35.2137};
@@ -30,7 +31,10 @@ function setMapOnAll(map) {
 
 // Removes the markers from the map, but keeps them in the array.
 function clearMarkers() {
-  setMapOnAll(null);
+  for (var i = 0; i < markers.length; i++ ) {
+    markers[i].setMap(null);
+  }
+  markers = [];
 }
 
 function showLocation(geotagId, placename, latitude, longitude, viewLatitude, viewLongitude, viewTilt, viewRoll, viewAltitude, viewHeading) {
@@ -180,9 +184,9 @@ let Scriptures = (function () {
     // });
 
     // TODO: Write clear markers method
-    // clearMarkers();
+    clearMarkers();
 
-    var markers = [];
+    markers = [];
 
     $("a[onclick^='showLocation']").each(function(){
       var location = $(this).attr("onclick").split(",");
