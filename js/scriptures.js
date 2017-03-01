@@ -1,34 +1,49 @@
 /*property
-    ajax, animate, append, appendTo, bookByID, books, complete, css, dataType,
-    duration, error, find, forEach, fullName, gridName, hasOwnProperty, hash,
-    html, id, init, length, location, log, maxBookId, minBookId, nextChapter,
+    ajax, animate, append, appendTo, bookByID, books, center, complete, css, dataType,
+    duration, error, find, forEach, fullName, getElementById, gridName, hasOwnProperty, hash,
+    html, id, init, lat, length, location, log, lng, Map, maps, maxBookId, minBookId, nextChapter,
     numChapters, onHashChanged, opacity, parentBookId, prevChapter, push,
     queue, remove, setTimeout, slice, split, substring, success, tocName, url,
-    urlForScriptureChapter, volumes
+    urlForScriptureChapter, volumes, zoom
 */
 
 
 /*global $, Number, window, console */
 /*jslint es6 browser: true*/
 
+var map;
+
 function initMap() {
   var jerusalem = {lat: 31.7683, lng: 35.2137};
-  var map = new google.maps.Map(document.getElementById('map'), {
+  map = new google.maps.Map(document.getElementById("map"), {
     zoom: 9,
     center: jerusalem
   });
 }
 
+// Sets the map on all markers in the array.
+function setMapOnAll(map) {
+  for (var i = 0; i < markers.length; i++) {
+    markers[i].setMap(map);
+  }
+}
+
+// Removes the markers from the map, but keeps them in the array.
+function clearMarkers() {
+  setMapOnAll(null);
+}
+
 function showLocation(geotagId, placename, latitude, longitude, viewLatitude, viewLongitude, viewTilt, viewRoll, viewAltitude, viewHeading) {
   var location = {lat: latitude, lng: longitude};
-  var map = new google.maps.Map(document.getElementById('map'), {
+  var map = new google.maps.Map(document.getElementById("map"), {
     zoom: viewAltitude / 500,
     center: location
   });
   var marker = new google.maps.Marker({
     position: location,
     map: map,
-    label: placename
+    label: placename,
+    animation: google.maps.Animation.DROP
   });
 }
 
@@ -158,14 +173,44 @@ let Scriptures = (function () {
       $(parentSelector).html(newContent);
     }
 
+    // var jerusalem = {lat: 31.7683, lng: 35.2137};
+    // var map = new google.maps.Map(document.getElementById("map"), {
+    //   zoom: 7,
+    //   center: jerusalem
+    // });
+
+    // TODO: Write clear markers method
+    // clearMarkers();
+
+    var markers = [];
+
     $("a[onclick^='showLocation']").each(function(){
-      console.log(this);
-      // Get map object
-      // Clear all map pins
-      // Drop pins in each location
-      // Pan to show all locations using fitBounds()
+      var location = $(this).attr("onclick").split(",");
+
+      var foo = {lat: Number(location[2]), lng: Number(location[3])}
+
+      var marker = new google.maps.Marker({
+        position: foo,
+        map: map,
+        label: location[1].replace(/'/g, ''),
+        animation: google.maps.Animation.DROP
+
+      });
+
+      markers.push(marker);
 
     });
+
+    if (markers.length > 0) {
+      var bounds = new google.maps.LatLngBounds();
+
+      for (var i = 0; i < markers.length; i++) {
+        bounds.extend(markers[i].getPosition());
+      }
+
+      map.fitBounds(bounds);
+      map.setCenter(bounds.getCenter());
+    }
   }
 
   function transitionBreadcrumbs(newCrumbs) {

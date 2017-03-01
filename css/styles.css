@@ -272,6 +272,11 @@ span.verse {
     right: 1em;
 }
 
+#suggest_button {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+}
 
 /* Media Query Stuff for Homework 8
 
