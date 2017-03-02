@@ -176,45 +176,6 @@ let Scriptures = (function () {
     } else {
       $(parentSelector).html(newContent);
     }
-
-    // var jerusalem = {lat: 31.7683, lng: 35.2137};
-    // var map = new google.maps.Map(document.getElementById("map"), {
-    //   zoom: 7,
-    //   center: jerusalem
-    // });
-
-    // TODO: Write clear markers method
-    clearMarkers();
-
-    markers = [];
-
-    $("a[onclick^='showLocation']").each(function(){
-      var location = $(this).attr("onclick").split(",");
-
-      var foo = {lat: Number(location[2]), lng: Number(location[3])}
-
-      var marker = new google.maps.Marker({
-        position: foo,
-        map: map,
-        label: location[1].replace(/'/g, ''),
-        animation: google.maps.Animation.DROP
-
-      });
-
-      markers.push(marker);
-
-    });
-
-    if (markers.length > 0) {
-      var bounds = new google.maps.LatLngBounds();
-
-      for (var i = 0; i < markers.length; i++) {
-        bounds.extend(markers[i].getPosition());
-      }
-
-      map.fitBounds(bounds);
-      map.setCenter(bounds.getCenter());
-    }
   }
 
   function transitionBreadcrumbs(newCrumbs) {
@@ -231,6 +192,42 @@ let Scriptures = (function () {
 
     transitionScriptures(html);
     transitionBreadcrumbs(requestedBreadcrumbs);
+
+    clearMarkers();
+
+    $("a[onclick^='showLocation']").each(function(){
+
+      console.log('in each function');
+
+      var location = $(this).attr("onclick").split(",");
+
+      var foo = {lat: Number(location[2]), lng: Number(location[3])}
+
+      var marker = new google.maps.Marker({
+        position: foo,
+        map: map,
+        label: location[1].replace(/'/g, ''),
+        animation: google.maps.Animation.DROP
+      });
+
+      markers.push(marker);
+
+    });
+
+    console.log('after');
+    console.log(markers.length);
+
+    if (markers.length > 0) {
+      var bounds = new google.maps.LatLngBounds();
+
+      for (var i = 0; i < markers.length; i++) {
+        bounds.extend(markers[i].getPosition());
+      }
+
+      map.fitBounds(bounds);
+      map.setCenter(bounds.getCenter());
+    }
+
   }
 
   function getScriptureFailed() {
