@@ -64,34 +64,22 @@ function getMarkersForChapter() {
       animation: google.maps.Animation.DROP
     });
 
-    if (counter === 0) {
-      markers.push(marker);
-    }
-
-    for (var m in markers) {
-      if (Math.abs(marker.getPosition().lat() - markers[m].getPosition().lat()) < 0.0000001
-       && Math.abs(marker.getPosition().lng() - markers[m].getPosition().lng()) < 0.0000001) {
-         console.log("Marker already in list");
-      } else {
-        markers.push(marker);
-      }
-    }
-
-    counter += 1;
-
-    // for (var i = 0; i < markers.length; i++) {
-    //   console.log("In the for");
-    //   if (Math.abs(marker.getPosition().lat() - markers[i].getPosition().lat()) < 0.0000001 && Math.abs(marker.getPosition().lng() - markers[i].getPosition().lng()) < 0.0000001) {
-    //      console.log("Marker already in list");
-    //   } else {
-    //     console.log("IN THE THING");
-    //     markers.push(marker);
-    //   }
+    // if (counter === 0) {
+    markers.push(marker);
     // }
 
-    // Math.abs(marker.getPosition().lat() - latitude) < 0.0000001 && Math.abs(marker.getPosition.lng() - longitude) < 0.0000001
+    for (var m in markers) {
+      console.log(m);
+      // if (Math.abs(marker.getPosition().lat() - markers[m].getPosition().lat()) < 0.0000001
+      //  && Math.abs(marker.getPosition().lng() - markers[m].getPosition().lng()) < 0.0000001) {
+      //    console.log("Marker already in list");
+      // } else {
+      //   markers.push(marker);
+      // }
+    }
     //
-    // markers.push(marker);
+    // counter += 1;
+
   });
 
   centerMapOnMarkers();
@@ -109,9 +97,10 @@ function centerMapOnMarkers() {
     map.setCenter(bounds.getCenter());
 
     // Make sure we're not zoomed in super close if there is only one marker
-    if (markers.length == 1 ) {
-      map.setZoom(10);
-    }
+
+    // if (markers.length == 1 ) {
+    //   map.setZoom(10);
+    // }
 
   }
 }
