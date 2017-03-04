@@ -14,16 +14,21 @@
 var map;
 var markers = [];
 var selected_placename;
+const MARKERS_DURATION = 750;
 
-// TODO: Fix this so that when you click on the suggestion button without having clicked a placename, it still works
-$("#suggest_button").children().click(function() {
-  console.log('AHHHHHHH');
-  $("#place_name").val(window.getSelection().toString());
-  $("#lat").val(map.getCenter());
-  $("#view_lat").val(map.getCenter());
-  $("#long").val(map.getCenter());
-  $("#view_long").val(map.getCenter());
-});
+
+function loadForm() {
+  if (window.getSelection() !== undefined) {
+    $("#place_name").val(window.getSelection().toString());
+  } else {
+    $("#place_name").val(selected_placename);
+  }
+  $("#lat").val(map.getCenter().lat());
+  $("#view_lat").val(map.getCenter().lat());
+  $("#long").val(map.getCenter().lng());
+  $("#view_long").val(map.getCenter().lng());
+  Materialize.updateTextFields();
+}
 
 function initMap() {
   var jerusalem = {lat: 31.7683, lng: 35.2137};
@@ -51,6 +56,17 @@ function deleteMarkers() {
   markers = [];
 }
 
+function checkIfMarkerInList(newMarker) {
+  for (var m in markers) {
+    if (Math.abs(newMarker.getPosition().lat() - markers[m].getPosition().lat()) < 0.0000001
+     && Math.abs(newMarker.getPosition().lng() - markers[m].getPosition().lng()) < 0.0000001) {
+       console.log("Marker already in list");
+    } else {
+      markers.push(marker);
+    }
+  }
+}
+
 function getMarkersForChapter() {
   var counter = 0;
   $("a[onclick^='showLocation']").each(function(){
@@ -64,21 +80,8 @@ function getMarkersForChapter() {
       animation: google.maps.Animation.DROP
     });
 
-    // if (counter === 0) {
+    // checkIfMarkerInList(marker);
     markers.push(marker);
-    // }
-
-    for (var m in markers) {
-      console.log(m);
-      // if (Math.abs(marker.getPosition().lat() - markers[m].getPosition().lat()) < 0.0000001
-      //  && Math.abs(marker.getPosition().lng() - markers[m].getPosition().lng()) < 0.0000001) {
-      //    console.log("Marker already in list");
-      // } else {
-      //   markers.push(marker);
-      // }
-    }
-    //
-    // counter += 1;
 
   });
 
@@ -111,10 +114,6 @@ function showLocation(geotagId, placename, latitude, longitude, viewLatitude, vi
 
   // Set form attributes
   $("#place_name").val(placename);
-  $("#lat").val(latitude);
-  $("#view_lat").val(latitude);
-  $("#long").val(longitude);
-  $("#view_long").val(longitude);
   Materialize.updateTextFields();
 
   // Re-center map on selected location
@@ -123,7 +122,7 @@ function showLocation(geotagId, placename, latitude, longitude, viewLatitude, vi
   // Zoom map into desired zoom level
   var zoomLevel = viewAltitude / 500;
 
-  console.log(zoomLevel);
+  console.log("Zoom level is: " + zoomLevel);
 
   if (zoomLevel < 5) {
     zoomLevel = 10;
@@ -133,6 +132,12 @@ function showLocation(geotagId, placename, latitude, longitude, viewLatitude, vi
 
 }
 
+function transitionMap() {
+  deleteMarkers();
+  setTimeout(getMarkersForChapter, MARKERS_DURATION);
+  selected_placename = "";
+}
+
 let Scriptures = (function () {
   // Force the browser into JS strict compliance mode.
   "use strict";
@@ -140,7 +145,6 @@ let Scriptures = (function () {
   // Constants
 
   const ANIMATION_DURATION = 700;
-  const MARKERS_DURATION = 750;
   const SCRIPTURES_URL = "http://scriptures.byu.edu/mapscrip/mapgetscrip.php";
 
   // Private Variables
@@ -276,8 +280,7 @@ let Scriptures = (function () {
     transitionScriptures(html);
     transitionBreadcrumbs(requestedBreadcrumbs);
 
-    deleteMarkers();
-    setTimeout(getMarkersForChapter, MARKERS_DURATION);
+    transitionMap();
   }
 
   function getScriptureFailed() {

@@ -115,8 +115,8 @@
     <script type="text/javascript">
       $(document).ready(function(){
         $('.modal').modal({
-          ready: function(modal, trigger) {
-            console.log(modal, trigger);
+          ready: function() {
+            loadForm();
           },
           complete: function() { console.log('Closed'); }
         });
