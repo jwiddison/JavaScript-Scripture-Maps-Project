@@ -279,6 +279,19 @@ span.verse {
   background-color: #3f2000;
 }
 
+.modal-close {
+  background-color: #3f2000;
+  color: white;
+}
+
+.modal-close:hover {
+  color:black;
+}
+
+.modal {
+  width: 75%;
+}
+
 /* Media Query Stuff for Homework 8
 
 TODOS:

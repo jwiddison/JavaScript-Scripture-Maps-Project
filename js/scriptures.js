@@ -13,6 +13,7 @@
 
 var map;
 var markers = [];
+var selected_placename;
 
 function initMap() {
   var jerusalem = {lat: 31.7683, lng: 35.2137};
@@ -34,21 +35,30 @@ function clearMarkers() {
   for (var i = 0; i < markers.length; i++ ) {
     markers[i].setMap(null);
   }
+
   markers = [];
 }
 
 function showLocation(geotagId, placename, latitude, longitude, viewLatitude, viewLongitude, viewTilt, viewRoll, viewAltitude, viewHeading) {
-  var location = {lat: latitude, lng: longitude};
-  var map = new google.maps.Map(document.getElementById("map"), {
-    zoom: viewAltitude / 500,
-    center: location
-  });
-  var marker = new google.maps.Marker({
-    position: location,
-    map: map,
-    label: placename,
-    animation: google.maps.Animation.DROP
-  });
+
+  // Set selected placename for suggestion box
+  selected_placename = placename;
+
+  // Set form attributes
+  $("#place_name").val(placename);
+  $("#lat").val(latitude);
+  $("#view_lat").val(latitude);
+  $("#long").val(longitude);
+  $("#view_long").val(longitude);
+  Materialize.updateTextFields();
+
+  // Re-center map on selected location
+  map.setCenter({lat: latitude, lng: longitude});
+
+  // Zoom map into desired zoom level
+  var zoomLevel = viewAltitude / 500;
+  map.setZoom(zoomLevel);
+
 }
 
 let Scriptures = (function () {
