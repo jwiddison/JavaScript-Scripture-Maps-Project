@@ -1,4 +1,11 @@
 /*property
+/*property
+/*property
+/*property
+/*property
+/*property
+/*property
+/*property
     ajax, animate, append, appendTo, bookByID, books, center, complete, css, dataType,
     duration, error, find, forEach, fullName, getElementById, gridName, hasOwnProperty, hash,
     html, id, init, lat, length, location, log, lng, Map, maps, maxBookId, minBookId, nextChapter,
@@ -78,6 +85,40 @@ function checkIfMarkerInList(newMarker) {
   }
 }
 
+function suggestLocation() {
+  console.log('form submitted');
+  var place_name = $('#place_name').val();
+  var lat = $('#lat').val();
+  var long = $('#long').val();
+  var view_lat = $('#view_lat').val();
+  var view_long = $('#view_long').val();
+  var view_tilt = $('#view_tilt').val();
+  var view_roll = $('#view_roll').val();
+  var view_altitude = $('#view_altitude').val();
+  var view_heading = $('#view_heading').val();
+
+  var url = "http://scriptures.byu.edu/mapscrip/suggestpm.php?" +
+    "id=" + "" +
+    "&placename=" + place_name +
+    "&latitude=" + lat +
+    "&longitude" + long +
+    "&viewLatitude" + view_lat +
+    "&viewLongitude=" + view_long +
+    "&viewTilt=" + view_tilt +
+    "&viewRoll=" + view_roll +
+    "&viewAltitude=" + view_altitude +
+    "&viewHeading=" + view_heading +
+    "&offset=" + "1" +
+    "&chapter=" + "1" +
+    "&bookId=" + "1"
+
+  console.log(url);
+}
+
+$.getScript("js/maplabel-compiled.js", function(){
+   console.log('external source loaded');
+});
+
 function getMarkersForChapter() {
   var counter = 0;
   $("a[onclick^='showLocation']").each(function(){
@@ -90,6 +131,15 @@ function getMarkersForChapter() {
       label: location[1].replace(/'/g, ''),
       animation: google.maps.Animation.DROP
     });
+
+    // var marker = new MapLabel({
+    //   align: "right",
+    //   map: map,
+    //   position: new google.maps.LatLng(loc),
+    //   fontColor: "#000000",
+    //   strokeColor: "#FFFFFF",
+    //   text: location[1].replace(/'/g, '')
+    // });
 
     // checkIfMarkerInList(marker);
     markers.push(marker);

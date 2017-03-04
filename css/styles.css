@@ -279,12 +279,12 @@ span.verse {
   background-color: #203248;
 }
 
-.modal-close {
+.modal-action {
   background-color: #203248;
   color: white;
 }
 
-.modal-close:hover {
+.modal-action:hover {
   color:black;
 }
 
