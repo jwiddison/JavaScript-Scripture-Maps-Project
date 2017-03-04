@@ -19,7 +19,7 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    background-color: #3f2000;
+    background-color: #203248;
     color: white;
     height: 56px;
     display: flex;
@@ -276,11 +276,11 @@ span.verse {
   position: absolute;
   right: 5px;
   top: 5px;
-  background-color: #3f2000;
+  background-color: #203248;
 }
 
 .modal-close {
-  background-color: #3f2000;
+  background-color: #203248;
   color: white;
 }
 

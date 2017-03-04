@@ -15,6 +15,15 @@ var map;
 var markers = [];
 var selected_placename;
 
+// TODO: Fix this so that when you click on the suggestion button without having clicked a placename, it still works
+$("#suggest_button").children().click(function() {
+  console.log('AHHHHHHH');
+  $("#lat").val(map.getCenter());
+  $("#view_lat").val(map.getCenter());
+  $("#long").val(map.getCenter());
+  $("#view_long").val(map.getCenter());
+});
+
 function initMap() {
   var jerusalem = {lat: 31.7683, lng: 35.2137};
   map = new google.maps.Map(document.getElementById("map"), {
@@ -32,15 +41,47 @@ function setMapOnAll(map) {
 
 // Removes the markers from the map, but keeps them in the array.
 function clearMarkers() {
-  for (var i = 0; i < markers.length; i++ ) {
-    markers[i].setMap(null);
-  }
+  setMapOnAll(null);
+}
 
+// Deletes all markers in the array by removing references to them.
+function deleteMarkers() {
+  clearMarkers();
   markers = [];
 }
 
-function showLocation(geotagId, placename, latitude, longitude, viewLatitude, viewLongitude, viewTilt, viewRoll, viewAltitude, viewHeading) {
+function getMarkersForChapter() {
+  $("a[onclick^='showLocation']").each(function(){
+    var location = $(this).attr("onclick").split(",");
+    var loc = {lat: Number(location[2]), lng: Number(location[3])}
 
+    var marker = new google.maps.Marker({
+      position: loc,
+      map: map,
+      label: location[1].replace(/'/g, ''),
+      animation: google.maps.Animation.DROP
+    });
+
+    markers.push(marker);
+  });
+
+  centerMapOnMarkers();
+}
+
+function centerMapOnMarkers() {
+  if (markers.length > 0) {
+    var bounds = new google.maps.LatLngBounds();
+
+    for (var i = 0; i < markers.length; i++) {
+      bounds.extend(markers[i].getPosition());
+    }
+
+    map.fitBounds(bounds);
+    map.setCenter(bounds.getCenter());
+  }
+}
+
+function showLocation(geotagId, placename, latitude, longitude, viewLatitude, viewLongitude, viewTilt, viewRoll, viewAltitude, viewHeading) {
   // Set selected placename for suggestion box
   selected_placename = placename;
 
@@ -68,6 +109,7 @@ let Scriptures = (function () {
   // Constants
 
   const ANIMATION_DURATION = 700;
+  const MARKERS_DURATION = 750;
   const SCRIPTURES_URL = "http://scriptures.byu.edu/mapscrip/mapgetscrip.php";
 
   // Private Variables
@@ -203,41 +245,8 @@ let Scriptures = (function () {
     transitionScriptures(html);
     transitionBreadcrumbs(requestedBreadcrumbs);
 
-    clearMarkers();
-
-    $("a[onclick^='showLocation']").each(function(){
-
-      console.log('in each function');
-
-      var location = $(this).attr("onclick").split(",");
-
-      var foo = {lat: Number(location[2]), lng: Number(location[3])}
-
-      var marker = new google.maps.Marker({
-        position: foo,
-        map: map,
-        label: location[1].replace(/'/g, ''),
-        animation: google.maps.Animation.DROP
-      });
-
-      markers.push(marker);
-
-    });
-
-    console.log('after');
-    console.log(markers.length);
-
-    if (markers.length > 0) {
-      var bounds = new google.maps.LatLngBounds();
-
-      for (var i = 0; i < markers.length; i++) {
-        bounds.extend(markers[i].getPosition());
-      }
-
-      map.fitBounds(bounds);
-      map.setCenter(bounds.getCenter());
-    }
-
+    deleteMarkers();
+    setTimeout(getMarkersForChapter, MARKERS_DURATION);
   }
 
   function getScriptureFailed() {
