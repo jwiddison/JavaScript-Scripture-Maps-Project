@@ -18,11 +18,22 @@ const MARKERS_DURATION = 750;
 
 
 function loadForm() {
-  if (window.getSelection() !== undefined) {
+  // if (window.getSelection().toString() !== null) {
+  //   $("#place_name").val(window.getSelection().toString());
+  //   console.log('some text selected');
+  // } else {
+  //   console.log("some text not selected");
+  //   $("#place_name").val(selected_placename);
+  // }
+
+  // TODO: Flip this boolean the other way.
+
+  if (selected_placename === "") {
     $("#place_name").val(window.getSelection().toString());
   } else {
     $("#place_name").val(selected_placename);
   }
+
   $("#lat").val(map.getCenter().lat());
   $("#view_lat").val(map.getCenter().lat());
   $("#long").val(map.getCenter().lng());
