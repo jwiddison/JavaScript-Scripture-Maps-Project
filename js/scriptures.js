@@ -18,6 +18,7 @@ var selected_placename;
 // TODO: Fix this so that when you click on the suggestion button without having clicked a placename, it still works
 $("#suggest_button").children().click(function() {
   console.log('AHHHHHHH');
+  $("#place_name").val(window.getSelection().toString());
   $("#lat").val(map.getCenter());
   $("#view_lat").val(map.getCenter());
   $("#long").val(map.getCenter());
@@ -51,6 +52,7 @@ function deleteMarkers() {
 }
 
 function getMarkersForChapter() {
+  var counter = 0;
   $("a[onclick^='showLocation']").each(function(){
     var location = $(this).attr("onclick").split(",");
     var loc = {lat: Number(location[2]), lng: Number(location[3])}
@@ -62,7 +64,34 @@ function getMarkersForChapter() {
       animation: google.maps.Animation.DROP
     });
 
-    markers.push(marker);
+    if (counter === 0) {
+      markers.push(marker);
+    }
+
+    for (var m in markers) {
+      if (Math.abs(marker.getPosition().lat() - markers[m].getPosition().lat()) < 0.0000001
+       && Math.abs(marker.getPosition().lng() - markers[m].getPosition().lng()) < 0.0000001) {
+         console.log("Marker already in list");
+      } else {
+        markers.push(marker);
+      }
+    }
+
+    counter += 1;
+
+    // for (var i = 0; i < markers.length; i++) {
+    //   console.log("In the for");
+    //   if (Math.abs(marker.getPosition().lat() - markers[i].getPosition().lat()) < 0.0000001 && Math.abs(marker.getPosition().lng() - markers[i].getPosition().lng()) < 0.0000001) {
+    //      console.log("Marker already in list");
+    //   } else {
+    //     console.log("IN THE THING");
+    //     markers.push(marker);
+    //   }
+    // }
+
+    // Math.abs(marker.getPosition().lat() - latitude) < 0.0000001 && Math.abs(marker.getPosition.lng() - longitude) < 0.0000001
+    //
+    // markers.push(marker);
   });
 
   centerMapOnMarkers();
@@ -78,6 +107,12 @@ function centerMapOnMarkers() {
 
     map.fitBounds(bounds);
     map.setCenter(bounds.getCenter());
+
+    // Make sure we're not zoomed in super close if there is only one marker
+    if (markers.length == 1 ) {
+      map.setZoom(10);
+    }
+
   }
 }
 
@@ -98,6 +133,13 @@ function showLocation(geotagId, placename, latitude, longitude, viewLatitude, vi
 
   // Zoom map into desired zoom level
   var zoomLevel = viewAltitude / 500;
+
+  console.log(zoomLevel);
+
+  if (zoomLevel < 5) {
+    zoomLevel = 10;
+  }
+
   map.setZoom(zoomLevel);
 
 }
