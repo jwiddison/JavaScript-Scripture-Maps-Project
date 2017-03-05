@@ -101,7 +101,7 @@ function suggestionFailed() {
 
 // Suggests a new geolocation for selected text
 function suggestLocation() {
-  console.log('form submitted');
+
   var place_name = $('#place_name').val();
   var lat = $('#lat').val();
   var long = $('#long').val();
@@ -128,13 +128,13 @@ function suggestLocation() {
     "&bookId=" + bookId +
     "&chapter=" + chapter
 
-  console.log(url);
+  // console.log(url);
 
   $.ajax({
     "url": url,
     "dataType": "json",
     "success": function(data) {
-      console.log("Success", data);
+      // console.log("Success", data);
       suggestionSuccess();
     },
     "error": suggestionFailed
@@ -143,17 +143,14 @@ function suggestLocation() {
 
 // Gets a list of all markers for a given chapter, and adds them to the map
 function getMarkersForChapter() {
-  var counter = 0;
   $("a[onclick^='showLocation']").each(function(){
     var location = $(this).attr("onclick").split(",");
 
     var latitude = Number(location[2]);
     var longitude = Number(location[3]);
 
-    var b = checkIfMarkerInList(latitude, longitude);
-    console.log(">>>>>>>>>>>>>>>>>>>>>>>> " + b);
-
     if (!checkIfMarkerInList(latitude, longitude)) {
+
       var loc = {lat: latitude, lng: longitude}
 
       var marker = new google.maps.Marker({
@@ -166,15 +163,6 @@ function getMarkersForChapter() {
 
       markers.push(marker);
     }
-
-
-
-    // if (markers.length === 0) {
-    //    markers.push(marker);
-    // } else {
-    //   checkIfMarkerInList(marker);
-    // }
-
   });
 
   centerMapOnMarkers();
@@ -192,8 +180,6 @@ function centerMapOnMarkers() {
 
     map.fitBounds(bounds);
     map.setCenter(bounds.getCenter());
-
-    console.log("length of markers array: " + markers.length);
 
     // Make sure we're not zoomed in super close if there is only one marker
     if (markers.length === 1) {
@@ -213,8 +199,6 @@ function showLocation(geotagId, placename, latitude, longitude, viewLatitude, vi
 
   // Zoom map into desired zoom level
   var zoomLevel = viewAltitude / 500;
-
-  console.log("Zoom level is: " + zoomLevel);
 
   if (zoomLevel < 5) {
     zoomLevel = 10;
