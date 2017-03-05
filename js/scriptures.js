@@ -11,6 +11,8 @@
 /*global $, Number, window, console */
 /*jslint es6 browser: true*/
 
+
+// Global variables / constants
 var map;
 var markers = [];
 var offset;
@@ -35,13 +37,17 @@ function initMap() {
 // Load up information for form.
 function loadForm() {
   $("#place_name").val(window.getSelection().toString());
+
   var latitude = map.getCenter().lat();
   var longitude = map.getCenter().lng();
   $("#lat").val(parseFloat(latitude).toFixed(4));
   $("#view_lat").val(parseFloat(latitude).toFixed(4));
   $("#long").val(parseFloat(longitude).toFixed(4));
   $("#view_long").val(parseFloat(longitude).toFixed(4));
+
+  // Setting it here while I still have access to highlighted text before modal appears
   offset = Xpath.getSelectionOffset();
+
   Materialize.updateTextFields();
 }
 
@@ -66,17 +72,20 @@ function deleteMarkers() {
 }
 
 // Checks to see if a proposed marker is already in the list
-function checkIfMarkerInList(newMarker) {
-  for (var m in markers) {
-    if (Math.abs(newMarker.getPosition().lat() - markers[m].getPosition().lat()) < 0.0000001
-     && Math.abs(newMarker.getPosition().lng() - markers[m].getPosition().lng()) < 0.0000001) {
-      console.log("Marker already in list");
-    } else {
-      console.log("Adding marker to list");
-      markers.push(marker);
+function checkIfMarkerInList(latitude, longitude) {
+  var counter = 0;
+  markers.forEach(function(m) {
+    if (Math.abs(m.getPosition().lat() - latitude) < 0.0000001 && Math.abs(m.getPosition().lng() - longitude) < 0.0000001) {
+      counter += 1;
     }
+  });
+  if (counter !== 0) {
+    return true;
+  } else {
+    return false;
   }
 }
+
 
 // Closes modal and gives a message when suggestion is succesful
 function suggestionSuccess() {
@@ -137,18 +146,34 @@ function getMarkersForChapter() {
   var counter = 0;
   $("a[onclick^='showLocation']").each(function(){
     var location = $(this).attr("onclick").split(",");
-    var loc = {lat: Number(location[2]), lng: Number(location[3])}
 
-    var marker = new google.maps.Marker({
-      position: loc,
-      map: map,
-      // Add custom label to map markers
-      label: location[1].replace(/'/g, ''),
-      animation: google.maps.Animation.DROP
-    });
+    var latitude = Number(location[2]);
+    var longitude = Number(location[3]);
 
-    // checkIfMarkerInList(marker);
-    markers.push(marker);
+    var b = checkIfMarkerInList(latitude, longitude);
+    console.log(">>>>>>>>>>>>>>>>>>>>>>>> " + b);
+
+    if (!checkIfMarkerInList(latitude, longitude)) {
+      var loc = {lat: latitude, lng: longitude}
+
+      var marker = new google.maps.Marker({
+        position: loc,
+        map: map,
+        // Add custom label to map markers
+        label: location[1].replace(/'/g, ''),
+        animation: google.maps.Animation.DROP
+      });
+
+      markers.push(marker);
+    }
+
+
+
+    // if (markers.length === 0) {
+    //    markers.push(marker);
+    // } else {
+    //   checkIfMarkerInList(marker);
+    // }
 
   });
 
@@ -168,11 +193,12 @@ function centerMapOnMarkers() {
     map.fitBounds(bounds);
     map.setCenter(bounds.getCenter());
 
-    // Make sure we're not zoomed in super close if there is only one marker
+    console.log("length of markers array: " + markers.length);
 
-    // if (markers.length == 1 ) {
-    //   map.setZoom(10);
-    // }
+    // Make sure we're not zoomed in super close if there is only one marker
+    if (markers.length === 1) {
+      map.setZoom(10);
+    }
 
   }
 }
