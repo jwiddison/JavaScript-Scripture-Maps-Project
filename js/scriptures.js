@@ -1,11 +1,4 @@
 /*property
-/*property
-/*property
-/*property
-/*property
-/*property
-/*property
-/*property
     ajax, animate, append, appendTo, bookByID, books, center, complete, css, dataType,
     duration, error, find, forEach, fullName, getElementById, gridName, hasOwnProperty, hash,
     html, id, init, lat, length, location, log, lng, Map, maps, maxBookId, minBookId, nextChapter,
@@ -20,40 +13,36 @@
 
 var map;
 var markers = [];
+var offset;
 var selected_placename;
 const MARKERS_DURATION = 750;
 
 
-function loadForm() {
-  // if (window.getSelection().toString() !== null) {
-  //   $("#place_name").val(window.getSelection().toString());
-  //   console.log('some text selected');
-  // } else {
-  //   console.log("some text not selected");
-  //   $("#place_name").val(selected_placename);
-  // }
+// ---------------------------------------------
+// --------------- Map Stuff -------------------
+// ---------------------------------------------
 
-  // TODO: Flip this boolean the other way.
 
-  if (selected_placename === "") {
-    $("#place_name").val(window.getSelection().toString());
-  } else {
-    $("#place_name").val(selected_placename);
-  }
-
-  $("#lat").val(map.getCenter().lat());
-  $("#view_lat").val(map.getCenter().lat());
-  $("#long").val(map.getCenter().lng());
-  $("#view_long").val(map.getCenter().lng());
-  Materialize.updateTextFields();
-}
-
+// Initializes Map
 function initMap() {
   var jerusalem = {lat: 31.7683, lng: 35.2137};
   map = new google.maps.Map(document.getElementById("map"), {
     zoom: 9,
     center: jerusalem
   });
+}
+
+// Load up information for form.
+function loadForm() {
+  $("#place_name").val(window.getSelection().toString());
+  var latitude = map.getCenter().lat();
+  var longitude = map.getCenter().lng();
+  $("#lat").val(parseFloat(latitude).toFixed(4));
+  $("#view_lat").val(parseFloat(latitude).toFixed(4));
+  $("#long").val(parseFloat(longitude).toFixed(4));
+  $("#view_long").val(parseFloat(longitude).toFixed(4));
+  offset = Xpath.getSelectionOffset();
+  Materialize.updateTextFields();
 }
 
 // Sets the map on all markers in the array.
@@ -63,9 +52,11 @@ function setMapOnAll(map) {
   }
 }
 
-// Removes the markers from the map, but keeps them in the array.
+// Removes the markers from the map
 function clearMarkers() {
   setMapOnAll(null);
+  offset = "";
+  selected_placename = "";
 }
 
 // Deletes all markers in the array by removing references to them.
@@ -74,17 +65,32 @@ function deleteMarkers() {
   markers = [];
 }
 
+// Checks to see if a proposed marker is already in the list
 function checkIfMarkerInList(newMarker) {
   for (var m in markers) {
     if (Math.abs(newMarker.getPosition().lat() - markers[m].getPosition().lat()) < 0.0000001
      && Math.abs(newMarker.getPosition().lng() - markers[m].getPosition().lng()) < 0.0000001) {
-       console.log("Marker already in list");
+      console.log("Marker already in list");
     } else {
+      console.log("Adding marker to list");
       markers.push(marker);
     }
   }
 }
 
+// Closes modal and gives a message when suggestion is succesful
+function suggestionSuccess() {
+  $('#suggest_form').modal('close');
+  Materialize.toast('Suggestion received successfully.  Thank you!', 4000)
+}
+
+// Closes modal and gives a message when suggestion fails
+function suggestionFailed() {
+  $('#suggest_form').modal('close');
+  Materialize.toast('Suggestion failed.  Please try again later', 4000)
+}
+
+// Suggests a new geolocation for selected text
 function suggestLocation() {
   console.log('form submitted');
   var place_name = $('#place_name').val();
@@ -96,29 +102,37 @@ function suggestLocation() {
   var view_roll = $('#view_roll').val();
   var view_altitude = $('#view_altitude').val();
   var view_heading = $('#view_heading').val();
+  var bookId = window.location.hash.substring(1).split(":")[1];
+  var chapter = window.location.hash.substring(1).split(":")[2];
 
   var url = "http://scriptures.byu.edu/mapscrip/suggestpm.php?" +
-    "id=" + "" +
-    "&placename=" + place_name +
+    "placename=" + place_name +
     "&latitude=" + lat +
-    "&longitude" + long +
-    "&viewLatitude" + view_lat +
+    "&longitude=" + long +
+    "&viewLatitude=" + view_lat +
     "&viewLongitude=" + view_long +
     "&viewTilt=" + view_tilt +
     "&viewRoll=" + view_roll +
     "&viewAltitude=" + view_altitude +
     "&viewHeading=" + view_heading +
-    "&offset=" + "1" +
-    "&chapter=" + "1" +
-    "&bookId=" + "1"
+    "&offset=" + offset +
+    "&bookId=" + bookId +
+    "&chapter=" + chapter
 
   console.log(url);
+
+  $.ajax({
+    "url": url,
+    "dataType": "json",
+    "success": function(data) {
+      console.log("Success", data);
+      suggestionSuccess();
+    },
+    "error": suggestionFailed
+  });
 }
 
-$.getScript("js/maplabel-compiled.js", function(){
-   console.log('external source loaded');
-});
-
+// Gets a list of all markers for a given chapter, and adds them to the map
 function getMarkersForChapter() {
   var counter = 0;
   $("a[onclick^='showLocation']").each(function(){
@@ -128,18 +142,10 @@ function getMarkersForChapter() {
     var marker = new google.maps.Marker({
       position: loc,
       map: map,
+      // Add custom label to map markers
       label: location[1].replace(/'/g, ''),
       animation: google.maps.Animation.DROP
     });
-
-    // var marker = new MapLabel({
-    //   align: "right",
-    //   map: map,
-    //   position: new google.maps.LatLng(loc),
-    //   fontColor: "#000000",
-    //   strokeColor: "#FFFFFF",
-    //   text: location[1].replace(/'/g, '')
-    // });
 
     // checkIfMarkerInList(marker);
     markers.push(marker);
@@ -149,6 +155,8 @@ function getMarkersForChapter() {
   centerMapOnMarkers();
 }
 
+
+// Sets bounds of map to show all markers for a chapter
 function centerMapOnMarkers() {
   if (markers.length > 0) {
     var bounds = new google.maps.LatLngBounds();
@@ -169,13 +177,10 @@ function centerMapOnMarkers() {
   }
 }
 
+// Focuses map on single location when geocoded links are clicked
 function showLocation(geotagId, placename, latitude, longitude, viewLatitude, viewLongitude, viewTilt, viewRoll, viewAltitude, viewHeading) {
   // Set selected placename for suggestion box
   selected_placename = placename;
-
-  // Set form attributes
-  $("#place_name").val(placename);
-  Materialize.updateTextFields();
 
   // Re-center map on selected location
   map.setCenter({lat: latitude, lng: longitude});
@@ -193,11 +198,19 @@ function showLocation(geotagId, placename, latitude, longitude, viewLatitude, vi
 
 }
 
+
+// Helper method that transitions map on changing chapter
 function transitionMap() {
   deleteMarkers();
   setTimeout(getMarkersForChapter, MARKERS_DURATION);
   selected_placename = "";
 }
+
+
+// -------------------------------------------------
+// ------------- Scripture Stuff -------------------
+// -------------------------------------------------
+
 
 let Scriptures = (function () {
   // Force the browser into JS strict compliance mode.
