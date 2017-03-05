@@ -17,6 +17,7 @@ var map;
 var markers = [];
 var offset;
 var selected_placename;
+var selected_placename_id;
 const MARKERS_DURATION = 750;
 
 
@@ -35,7 +36,7 @@ function initMap() {
 }
 
 // Load up information for form.
-function loadForm() {
+function loadSuggestionForm() {
   $("#place_name").val(window.getSelection().toString());
 
   var latitude = map.getCenter().lat();
@@ -47,6 +48,18 @@ function loadForm() {
 
   // Setting it here while I still have access to highlighted text before modal appears
   offset = Xpath.getSelectionOffset();
+
+  Materialize.updateTextFields();
+}
+
+function loadEditForm() {
+  $("#edit_place_name").val(selected_placename);
+  var latitude = map.getCenter().lat();
+  var longitude = map.getCenter().lng();
+  $("#edit_lat").val(parseFloat(latitude).toFixed(4));
+  $("#edit_view_lat").val(parseFloat(latitude).toFixed(4));
+  $("#edit_long").val(parseFloat(longitude).toFixed(4));
+  $("#edit_view_long").val(parseFloat(longitude).toFixed(4));
 
   Materialize.updateTextFields();
 }
@@ -90,12 +103,14 @@ function checkIfMarkerInList(latitude, longitude) {
 // Closes modal and gives a message when suggestion is succesful
 function suggestionSuccess() {
   $('#suggest_form').modal('close');
+  $('#edit_form').modal('close');
   Materialize.toast('Suggestion received successfully.  Thank you!', 4000)
 }
 
 // Closes modal and gives a message when suggestion fails
 function suggestionFailed() {
   $('#suggest_form').modal('close');
+  $('#edit_form').modal('close');
   Materialize.toast('Suggestion failed.  Please try again later', 4000)
 }
 
@@ -127,6 +142,44 @@ function suggestLocation() {
     "&offset=" + offset +
     "&bookId=" + bookId +
     "&chapter=" + chapter
+
+  // console.log(url);
+
+  $.ajax({
+    "url": url,
+    "dataType": "json",
+    "success": function(data) {
+      // console.log("Success", data);
+      suggestionSuccess();
+    },
+    "error": suggestionFailed
+  });
+}
+
+// Suggests edits for selected place
+function editPlace() {
+  var id = selected_placename_id;
+  var place_name = selected_placename;
+  var lat = $('#edit_lat').val();
+  var long = $('#edit_long').val();
+  var view_lat = $('#edit_view_lat').val();
+  var view_long = $('#edit_view_long').val();
+  var view_tilt = $('#edit_view_tilt').val();
+  var view_roll = $('#edit_view_roll').val();
+  var view_altitude = $('#edit_view_altitude').val();
+  var view_heading = $('#edit_view_heading').val();
+
+  var url = "http://scriptures.byu.edu/mapscrip/suggestpm.php?" +
+    "id=" + id +
+    "&placename=" + place_name +
+    "&latitude=" + lat +
+    "&longitude=" + long +
+    "&viewLatitude=" + view_lat +
+    "&viewLongitude=" + view_long +
+    "&viewTilt=" + view_tilt +
+    "&viewRoll=" + view_roll +
+    "&viewAltitude=" + view_altitude +
+    "&viewHeading=" + view_heading
 
   // console.log(url);
 
@@ -191,8 +244,9 @@ function centerMapOnMarkers() {
 
 // Focuses map on single location when geocoded links are clicked
 function showLocation(geotagId, placename, latitude, longitude, viewLatitude, viewLongitude, viewTilt, viewRoll, viewAltitude, viewHeading) {
-  // Set selected placename for suggestion box
+  // Set selected placename and ID for suggestion box
   selected_placename = placename;
+  selected_placename_id = geotagId;
 
   // Re-center map on selected location
   map.setCenter({lat: latitude, lng: longitude});
@@ -206,6 +260,8 @@ function showLocation(geotagId, placename, latitude, longitude, viewLatitude, vi
 
   map.setZoom(zoomLevel);
 
+  // $("#edit_button").parent().css("display", "inline");
+
 }
 
 
@@ -214,6 +270,7 @@ function transitionMap() {
   deleteMarkers();
   setTimeout(getMarkersForChapter, MARKERS_DURATION);
   selected_placename = "";
+  selected_placename_id = "";
 }
 
 

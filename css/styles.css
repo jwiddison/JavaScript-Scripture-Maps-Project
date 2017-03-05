@@ -274,8 +274,15 @@ span.verse {
 
 #suggest_button {
   position: absolute;
-  right: 5px;
   top: 5px;
+  right: 5px;
+  background-color: #203248;
+}
+
+#edit_button {
+  position: absolute;
+  top: 5px;
+  right: 75px;
   background-color: #203248;
 }
 
